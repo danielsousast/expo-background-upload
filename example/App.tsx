@@ -1,7 +1,6 @@
-import { useEvent } from 'expo';
 import * as DocumentPicker from 'expo-document-picker';
 import { BackgroundUpload } from 'background-upload';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Alert, Button, SafeAreaView, ScrollView, Text, View } from 'react-native';
 
 export default function App() {
@@ -9,36 +8,46 @@ export default function App() {
   const [uploadStatus, setUploadStatus] = useState<{[key: string]: string}>({});
   const [activeUploads, setActiveUploads] = useState<Set<string>>(new Set());
   
-  // Listen to upload progress events
-  useEvent(BackgroundUpload, 'onUploadProgress', (event) => {
-    console.log('Upload progress:', event);
-    setUploadProgress(prev => ({
-      ...prev,
-      [event?.uploadId]: event?.progress
-    }));
-  });
-  
-  // Listen to upload completion events
-  useEvent(BackgroundUpload, 'onUploadComplete', (event) => {
-    console.log('Upload complete:', event);
-    setUploadStatus(prev => ({
-      ...prev,
-      [event?.uploadId]: event?.success ? 'Success' : `Failed: ${event?.error}`
-    }));
-    
-    // Remove from active uploads
-    setActiveUploads(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(event?.uploadId);
-      return newSet;
+  // Listen to upload progress and completion events
+  useEffect(() => {
+    const progressListener = BackgroundUpload.addListener('onUploadProgress', (event) => {
+      console.log('Upload progress:', event);
+      if (event?.uploadId && event?.progress !== undefined) {
+        setUploadProgress(prev => ({
+          ...prev,
+          [event.uploadId]: event.progress
+        }));
+      }
     });
     
-    if (event?.success) {
-      Alert.alert('Upload Complete', `Upload ${event?.uploadId} completed successfully!`);
-    } else {
-      Alert.alert('Upload Failed', `Upload ${event?.uploadId} failed: ${event?.error}`);
-    }
-  });
+    const completeListener = BackgroundUpload.addListener('onUploadComplete', (event) => {
+      console.log('Upload complete:', event);
+      if (event?.uploadId) {
+        setUploadStatus(prev => ({
+          ...prev,
+          [event.uploadId]: event?.success ? 'Success' : `Failed: ${event?.error || 'Unknown error'}`
+        }));
+        
+        // Remove from active uploads
+        setActiveUploads(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(event.uploadId);
+          return newSet;
+        });
+        
+        if (event?.success) {
+          Alert.alert('Upload Complete', `Upload ${event.uploadId} completed successfully!`);
+        } else {
+          Alert.alert('Upload Failed', `Upload ${event.uploadId} failed: ${event?.error || 'Unknown error'}`);
+        }
+      }
+    });
+    
+    return () => {
+      progressListener?.remove();
+      completeListener?.remove();
+    };
+  }, []);
   
   const pickAndUploadFile = async () => {
     try {
