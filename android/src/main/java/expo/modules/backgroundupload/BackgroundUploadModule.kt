@@ -37,7 +37,7 @@ class BackgroundUploadModule : Module() {
           .putString(BackgroundUploadWorker.KEY_FILE_NAME, fileName)
           .putString(BackgroundUploadWorker.KEY_CONTENT_TYPE, contentType)
           .putString(BackgroundUploadWorker.KEY_UPLOAD_ID, uploadId)
-          .putString(BackgroundUploadWorker.KEY_MODULE_NAME, name)
+          .putString(BackgroundUploadWorker.KEY_MODULE_NAME, "BackgroundUpload")
           .build()
 
         val uploadRequest = OneTimeWorkRequestBuilder<BackgroundUploadWorker>()
