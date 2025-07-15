@@ -1,17 +1,17 @@
 # Background Upload
 
-Um módulo nativo moderno para Expo que permite uploads de arquivos em background tanto em projetos Expo (com Dev Client e EAS Build) quanto em React Native CLI.
+A modern native module for Expo that enables background file uploads for both Expo projects (with Dev Client and EAS Build) and React Native CLI.
 
-## Características
+## Features
 
-- ✅ **Upload em Background**: Funciona mesmo quando o app está em background
-- ✅ **Multiplataforma**: iOS (URLSession) e Android (WorkManager)
-- ✅ **Progresso em Tempo Real**: Eventos de progresso de 0 a 1
-- ✅ **Confiável**: Usa WorkManager no Android e URLSession no iOS
-- ✅ **Customizável**: Headers, fieldName, fileName e contentType
-- ✅ **TypeScript**: Totalmente tipado
+- ✅ **Background Upload**: Works even when the app is in background
+- ✅ **Cross-platform**: iOS (URLSession) and Android (WorkManager)
+- ✅ **Real-time Progress**: Progress events from 0 to 1
+- ✅ **Reliable**: Uses WorkManager on Android and URLSession on iOS
+- ✅ **Customizable**: Headers, fieldName, fileName and contentType
+- ✅ **TypeScript**: Fully typed
 
-## Instalação
+## Installation
 
 ```bash
 npm install background-upload
@@ -19,9 +19,9 @@ npm install background-upload
 yarn add background-upload
 ```
 
-### Configuração iOS
+### iOS Configuration
 
-Adicione as seguintes capacidades no seu `Info.plist`:
+Add the following capabilities to your `Info.plist`:
 
 ```xml
 <key>UIBackgroundModes</key>
@@ -31,25 +31,25 @@ Adicione as seguintes capacidades no seu `Info.plist`:
 </array>
 ```
 
-### Configuração Android
+### Android Configuration
 
-As permissões necessárias já estão incluídas no módulo:
+Required permissions are already included in the module:
 
 - `INTERNET`
 - `ACCESS_NETWORK_STATE`
 - `READ_EXTERNAL_STORAGE`
 - `WAKE_LOCK`
 
-## Uso
+## Usage
 
-### Importação
+### Import
 
 ```typescript
 import { BackgroundUpload } from 'background-upload';
 import type { UploadOptions, UploadProgressEventPayload, UploadCompleteEventPayload } from 'background-upload';
 ```
 
-### Upload Básico
+### Basic Upload
 
 ```typescript
 const uploadFile = async () => {
@@ -65,36 +65,36 @@ const uploadFile = async () => {
       contentType: 'application/pdf'
     });
     
-    console.log('Upload iniciado:', uploadId);
+    console.log('Upload started:', uploadId);
   } catch (error) {
-    console.error('Erro no upload:', error);
+    console.error('Upload error:', error);
   }
 };
 ```
 
-### Monitorando Progresso
+### Monitoring Progress
 
 ```typescript
 import { useEvent } from 'expo';
 
 function MyComponent() {
-  // Escutar eventos de progresso
+  // Listen to progress events
   useEvent(BackgroundUpload, 'onUploadProgress', (event: UploadProgressEventPayload) => {
     console.log(`Upload ${event.uploadId}: ${Math.round(event.progress * 100)}%`);
     console.log(`${event.bytesUploaded} / ${event.totalBytes} bytes`);
   });
   
-  // Escutar eventos de conclusão
+  // Listen to completion events
   useEvent(BackgroundUpload, 'onUploadComplete', (event: UploadCompleteEventPayload) => {
     if (event.success) {
-      console.log('Upload concluído:', event.response);
+      console.log('Upload completed:', event.response);
     } else {
-      console.error('Upload falhou:', event.error);
+      console.error('Upload failed:', event.error);
     }
   });
   
   return (
-    // Seu componente
+    // Your component
   );
 }
 ```
@@ -103,81 +103,81 @@ function MyComponent() {
 
 ### `startUploadAsync(fileUri: string, options: UploadOptions): Promise<string>`
 
-Inicia um upload em background.
+Starts a background upload.
 
-**Parâmetros:**
-- `fileUri`: URI do arquivo a ser enviado
-- `options`: Opções de configuração do upload
+**Parameters:**
+- `fileUri`: URI of the file to be uploaded
+- `options`: Upload configuration options
 
-**Retorna:** Promise que resolve com o ID único do upload
+**Returns:** Promise that resolves with the unique upload ID
 
 ### `UploadOptions`
 
 ```typescript
 interface UploadOptions {
-  url: string;                    // URL de destino (obrigatório)
-  headers?: Record<string, string>; // Headers HTTP opcionais
-  fieldName?: string;             // Nome do campo no form (padrão: "file")
-  fileName?: string;              // Nome do arquivo (padrão: "upload")
-  contentType?: string;           // Tipo de conteúdo (padrão: "application/octet-stream")
+  url: string;                    // Target URL (required)
+  headers?: Record<string, string>; // Optional HTTP headers
+  fieldName?: string;             // Form field name (default: "file")
+  fileName?: string;              // File name (default: "upload")
+  contentType?: string;           // Content type (default: "application/octet-stream")
 }
 ```
 
-### Eventos
+### Events
 
 #### `onUploadProgress`
 
-Emitido durante o upload com informações de progresso.
+Emitted during upload with progress information.
 
 ```typescript
 interface UploadProgressEventPayload {
-  uploadId: string;    // ID do upload
-  progress: number;    // Progresso de 0 a 1
-  bytesUploaded: number; // Bytes enviados
-  totalBytes: number;  // Total de bytes
+  uploadId: string;    // Upload ID
+  progress: number;    // Progress from 0 to 1
+  bytesUploaded: number; // Bytes uploaded
+  totalBytes: number;  // Total bytes
 }
 ```
 
 #### `onUploadComplete`
 
-Emitido quando o upload é concluído (sucesso ou falha).
+Emitted when upload is completed (success or failure).
 
 ```typescript
 interface UploadCompleteEventPayload {
-  uploadId: string;     // ID do upload
-  success: boolean;     // Se o upload foi bem-sucedido
-  response?: string;    // Resposta do servidor (se sucesso)
-  error?: string;       // Mensagem de erro (se falha)
-  statusCode?: number;  // Código de status HTTP
+  uploadId: string;     // Upload ID
+  success: boolean;     // Whether upload was successful
+  response?: string;    // Server response (if success)
+  error?: string;       // Error message (if failure)
+  statusCode?: number;  // HTTP status code
 }
 ```
 
-## Exemplo Completo
+## Complete Example
 
-Veja o arquivo `example/App.tsx` para um exemplo completo de uso com seleção de arquivos e monitoramento de progresso.
+See the `example/App.tsx` file for a complete usage example with file selection and progress monitoring.
 
-## Implementação Técnica
+## Technical Implementation
 
 ### Android
-- Usa **WorkManager** para gerenciar uploads em background de forma confiável
-- Usa **OkHttp** para realizar as requisições HTTP
-- Suporta uploads mesmo quando o app está fechado
+- Uses **WorkManager** to reliably manage background uploads
+- Uses **OkHttp** to perform HTTP requests
+- Supports uploads even when the app is closed
 
 ### iOS
-- Usa **URLSession** com `backgroundSessionConfiguration`
-- Implementa delegates para progresso e finalização
-- Suporta uploads em background com notificações do sistema
+- Uses **URLSession** with `backgroundSessionConfiguration`
+- Implements delegates for progress and completion
+- Supports background uploads with system notifications
 
-## Limitações
+## Limitations
 
-- No iOS, uploads em background podem ser pausados pelo sistema em condições de baixa bateria
-- No Android, uploads podem ser limitados por otimizações de bateria do dispositivo
-- Arquivos muito grandes podem ser rejeitados por alguns servidores
+- On iOS, background uploads may be paused by the system under low battery conditions
+- On Android, uploads may be limited by device battery optimizations
+- Very large files may be rejected by some servers
 
-## Contribuição
+## Contributing
 
-Contribuições são bem-vindas! Por favor, abra uma issue ou pull request.
+Contributions are welcome! Please open an issue or pull request.
 
-## Licença
+## License
 
 MIT
